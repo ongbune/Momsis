@@ -1,0 +1,7 @@
+﻿Public Enum EProducts As Integer
+    SOYBEAN = 15510
+    SOYBEAN_CHILD = 15502
+    SOYBEAN_CA = 15516
+    SOYBEAN_HEAD_CUT = 15492
+    MUNGBEAN = 15027
+End Enum
