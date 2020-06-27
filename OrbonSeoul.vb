@@ -22,12 +22,19 @@ Public Class OrbonSeoul
         S = X.Worksheets(1)
         R = S.Range(S.Cells(1, 1), S.Cells(65000, 250))
         R.Columns.AutoFit()
+        Dim rowCount As Integer = S.Range("A1", S.Range("A1").End(4)).Rows.Count
+        If rowCount < 2 Or S.Cells(1, 1).Value <> "DLVR_CMPN_NM" Then
+            MsgBox("잘못된 파일을 선택하였습니다.")
+            B.Close(False)
+            B = Nothing
+            X.Quit()
+            X = Nothing
+            Return
+        End If
 
         S.Range("A:A, C:I, K:L, O:U, W:W, Z:Z, AG:AY").EntireColumn.Delete()
         S.Cells(1, 7).Value = "BOX_SIZE"
 
-        Dim i As Integer
-        Dim rowCount As Integer = S.Range("A1", S.Range("A1").End(4)).Rows.Count
         S.Range("H:H").NumberFormat = "@"
         S.Columns(10).Insert()
         S.Range("B:B").Copy()
@@ -35,6 +42,7 @@ Public Class OrbonSeoul
         S.Columns(2).Delete
         S.Cells(1, 7).Value = "LOT_NO"
 
+        Dim i As Integer
         For i = 2 To rowCount
             S.Cells(i, 7).Value = Right(S.Cells(i, 7).Value, 1) & "/" & Left(S.Cells(i, 7).Value, 1)
         Next
@@ -79,29 +87,37 @@ Public Class OrbonSeoul
         Dim sGangseo2 As Excel.Worksheet
         Dim tmp As Excel.Worksheet
 
-        sGangseo2 = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
-        sGangseo2.Name = "강서지하"
-        sGangseo = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
-        sGangseo.Name = "강서"
-        sGarak2 = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
-        sGarak2.Name = "가락2층"
-        sGarak = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
-        sGarak.Name = "가락"
-
         tmp = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
         tmp.Range("A1").Resize(1, S.Columns.Count).Value = S.Rows(1).Value
-        tmp.Cells(2, 9).Value = 2
 
-        S.Range("A1:M" & rowCount).AdvancedFilter(Excel.XlFilterAction.xlFilterCopy, tmp.Range("A1").CurrentRegion, sGarak.Range("A1")) '가락
-        tmp.Cells(2, 9).Value = 84
+        If X.WorksheetFunction.CountIf(S.Range("I:I"), "2") > 0 Then
+            tmp.Cells(2, 9).Value = 2
+            sGarak = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
+            sGarak.Name = "가락"
+            S.Range("A1:M" & rowCount).AdvancedFilter(Excel.XlFilterAction.xlFilterCopy, tmp.Range("A1").CurrentRegion, sGarak.Range("A1")) '가락
+        End If
 
-        S.Range("A1:M" & rowCount).AdvancedFilter(Excel.XlFilterAction.xlFilterCopy, tmp.Range("A1").CurrentRegion, sGarak2.Range("A1")) '가락2층
-        tmp.Cells(2, 9).Value = 1
+        If X.WorksheetFunction.CountIf(S.Range("I:I"), "84") > 0 Then
+            tmp.Cells(2, 9).Value = 84
+            sGarak2 = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
+            sGarak2.Name = "가락2층"
+            S.Range("A1:M" & rowCount).AdvancedFilter(Excel.XlFilterAction.xlFilterCopy, tmp.Range("A1").CurrentRegion, sGarak2.Range("A1")) '가락2층
+        End If
 
-        S.Range("A1:M" & rowCount).AdvancedFilter(Excel.XlFilterAction.xlFilterCopy, tmp.Range("A1").CurrentRegion, sGangseo.Range("A1")) '강서
-        tmp.Cells(2, 9).Value = 62
+        If X.WorksheetFunction.CountIf(S.Range("I:I"), "1") > 0 Then
+            tmp.Cells(2, 9).Value = 1
+            sGangseo = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
+            sGangseo.Name = "강서"
+            S.Range("A1:M" & rowCount).AdvancedFilter(Excel.XlFilterAction.xlFilterCopy, tmp.Range("A1").CurrentRegion, sGangseo.Range("A1")) '강서
+        End If
 
-        S.Range("A1:M" & rowCount).AdvancedFilter(Excel.XlFilterAction.xlFilterCopy, tmp.Range("A1").CurrentRegion, sGangseo2.Range("A1")) '강서
+        If X.WorksheetFunction.CountIf(S.Range("I:I"), "62") > 0 Then
+            tmp.Cells(2, 9).Value = 62
+            sGangseo2 = worksheets.Add(worksheets(1), Type.Missing, Type.Missing, Type.Missing)
+            sGangseo2.Name = "강서지하"
+            S.Range("A1:M" & rowCount).AdvancedFilter(Excel.XlFilterAction.xlFilterCopy, tmp.Range("A1").CurrentRegion, sGangseo2.Range("A1")) '강서지하
+        End If
+
         X.DisplayAlerts = False
         tmp.Delete()
         X.DisplayAlerts = True
